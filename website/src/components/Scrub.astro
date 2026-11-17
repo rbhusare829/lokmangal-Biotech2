@@ -1,0 +1,39 @@
+---
+/**
+ * Text that lights up as it scrolls through the viewport. Latin text is split per letter;
+ * Devanagari is split per word so conjuncts and vowel signs are never broken apart.
+ * Screen readers get the plain sentence once.
+ */
+interface Props {
+  text: string;
+  as?: 'p' | 'h2' | 'h3';
+  class?: string;
+}
+
+const { text, as: Tag = 'p', class: cls } = Astro.props;
+const perWord = /[ऀ-ॿ]/.test(text);
+const words = text.split(/\s+/).filter(Boolean);
+let ci = 0;
+const units = words.map((w) => (perWord ? [{ c: w, i: ci++ }] : [...w].map((c) => ({ c, i: ci++ }))));
+// A word in Devanagari counts as four letters, so the sweep keeps the same pace.
+const step = perWord ? 4 : 1;
+const n = ci * step;
+---
+
+<Tag class:list={['scrub', cls]} data-scroll="read">
+  <span class="sr-only">{text}</span>
+  <span aria-hidden="true" style={`--n:${n}`}>
+    {
+      units.map((u, wi) => (
+        <>
+          <span class="scrub__w">
+            {u.map((x) => (
+              <span class="ch" style={`--ci:${x.i * step}`}>{x.c}</span>
+            ))}
+          </span>
+          {wi < units.length - 1 ? ' ' : ''}
+        </>
+      ))
+    }
+  </span>
+</Tag>

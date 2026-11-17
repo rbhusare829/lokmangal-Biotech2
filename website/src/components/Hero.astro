@@ -1,0 +1,61 @@
+---
+import { href, num, type Lang } from '../data/types';
+import { ESTABLISHED } from '../data/site';
+import { slideWords, wordCount } from '../data/split';
+import Photo from './Photo.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const m = lang === 'mr';
+
+const line1 = m ? 'संतुलित पोषण,' : 'Balanced nutrition,';
+const line2 = m ? 'भरघोस उत्पादन.' : 'richer harvests.';
+const sub = m
+  ? `संशोधनावर आधारित खते व जैविक उत्पादने, सोलापूरमध्ये ${num(lang, ESTABLISHED)} पासून तयार होत आहेत.`
+  : `Research-based fertilizers and bio-products, made in Solapur since ${ESTABLISHED}.`;
+const tag = m ? ['प्रयोगशाळेतून', 'थेट शेतात—'] : ['From the lab', 'to your land—'];
+const brand = m ? 'लोकमंगल' : 'Lokmangal';
+// Devanagari letters are split by grapheme so vowel signs stay attached.
+const letters = m ? Array.from(new Intl.Segmenter('mr', { granularity: 'grapheme' }).segment(brand), (s) => s.segment) : [...brand];
+const crosses = [0, 33.333, 66.666, 100].flatMap((x) => [0, 33.333, 66.666, 100].map((y) => ({ x, y })));
+---
+
+<section class="ahero" aria-label={m ? 'मुख्य संदेश' : 'Introduction'}>
+  <div class="ahero__bg" aria-hidden="true">
+    <Photo name="hero-rows" alt="" widths={[800, 1280, 1920]} sizes="100vw" eager quality={66} />
+  </div>
+  <div class="ahero__shade" aria-hidden="true"></div>
+  <div class="ahero__crosses" aria-hidden="true">
+    {crosses.map((c, i) => <i style={`--x:${c.x}%;--y:${c.y}%;--i:${i}`} />)}
+  </div>
+
+  <div class="container--wide ahero__inner">
+    <div class="ahero__copy">
+      <h1 class="ahero__title" data-slide style="--d:.35s">
+        <span set:html={slideWords(line1, 0, -1)} />
+        <br />
+        <span set:html={slideWords(line2, wordCount(line1), 1)} />
+      </h1>
+      <p class="ahero__sub ahero__fade" style="--d:1.05s">
+        <span class="ring" aria-hidden="true"></span>
+        <span>{sub}</span>
+      </p>
+      <div class="tlinks tlinks--start on-dark ahero__links ahero__fade" style="--d:1.25s">
+        <a class="tlink" href={href(lang, '/products/')}>{m ? 'उत्पादने पाहा' : 'Explore products'}</a>
+        <a class="tlink" href={href(lang, '/crops/')}>{m ? 'पिकानुसार शोधा' : 'Find by crop'}</a>
+        <a class="tlink" href={href(lang, '/research-lab/#sample')}>{m ? 'मोफत माती परीक्षण' : 'Free soil testing'}</a>
+      </div>
+    </div>
+    <p class="ahero__tag ahero__fade" style="--d:1.45s">
+      <span>{tag[0]}</span>
+      <span>{tag[1]}</span>
+    </p>
+  </div>
+
+  <p class="ahero__brand" aria-hidden="true">
+    {letters.map((ch, i) => <span style={`--i:${i}`}>{ch}</span>)}
+  </p>
+</section>

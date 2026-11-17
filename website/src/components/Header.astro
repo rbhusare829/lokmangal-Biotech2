@@ -1,0 +1,133 @@
+---
+import { href, type Lang } from '../data/types';
+import { t } from '../data/i18n';
+import { CONTACT } from '../data/site';
+import { CATEGORIES, categoryUrl } from '../data/products';
+import { CROPS, cropUrl } from '../data/crops';
+import Icon from './Icon.astro';
+import Logo from './Logo.astro';
+
+interface Props {
+  lang: Lang;
+  path: string;
+  /** "over": transparent above a dark hero until the page scrolls. "solid": always on a light bar. */
+  mode?: 'over' | 'solid';
+}
+
+const { lang, path, mode = 'over' } = Astro.props;
+const d = t(lang);
+const m = lang === 'mr';
+const altLang: Lang = lang === 'en' ? 'mr' : 'en';
+const altHref = href(altLang, path);
+const altLabel = lang === 'en' ? 'मराठी' : 'English';
+const isActive = (p: string) => (p === '/' ? path === '/' : path.startsWith(p));
+
+const main = [
+  { to: '/', label: d.home },
+  { to: '/about/', label: d.about },
+  { to: '/products/', label: d.products },
+  { to: '/crops/', label: d.crops },
+  { to: '/research-lab/', label: d.lab },
+  { to: '/knowledge/', label: d.knowledge },
+  { to: '/dealers/', label: d.dealersShort },
+  { to: '/contact/', label: d.contact },
+];
+const company = [
+  { to: '/about/founder-message/', label: d.founder },
+  { to: '/manufacturing/', label: d.manufacturing },
+  { to: '/gallery/', label: d.gallery },
+  { to: '/downloads/', label: d.downloads },
+];
+const social = [
+  { label: 'WA', name: d.whatsapp, url: `https://wa.me/${CONTACT.phonePrimary.wa}` },
+  { label: 'FB', name: 'Facebook', url: CONTACT.facebook },
+  { label: 'YT', name: 'YouTube', url: CONTACT.youtube },
+  { label: m ? 'ई-मेल' : 'Email', name: d.email, url: `mailto:${CONTACT.email}` },
+];
+---
+
+<a class="skip" href="#main">{d.skip}</a>
+<div class="scroll-progress" aria-hidden="true"></div>
+
+<header class="hdr" data-header data-mode={mode}>
+  <div class="container--wide hdr__inner">
+    <nav class="hdr__social" aria-label={m ? 'सोशल मीडिया' : 'Social links'}>
+      {
+        social.map((s) => (
+          <a href={s.url} target={s.url.startsWith('http') ? '_blank' : undefined} rel={s.url.startsWith('http') ? 'noopener' : undefined} aria-label={s.name} data-roll>
+            {s.label}
+          </a>
+        ))
+      }
+    </nav>
+    <Logo lang={lang} />
+    <div class="hdr__actions">
+      <a class="hdr__lang sysdeva" href={altHref} hreflang={altLang} lang={altLang} data-lang-switch>{altLabel}</a>
+      <button class="hdr__icon" type="button" data-search-open aria-label={d.search}><Icon name="search" size={19} /></button>
+      <a class="btn btn--primary btn--sm hdr__cta" href={href(lang, '/contact/')}>{d.enquire}</a>
+      <button class="burger" type="button" data-menu-open aria-expanded="false" aria-controls="site-menu">
+        <span></span><span></span><span class="sr-only">{d.menu}</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<dialog class="menu" id="site-menu" data-menu aria-label={d.menu}>
+  <div class="menu__panel">
+    <div class="container--wide menu__top">
+      <p class="menu__time">
+        <span class="ring" aria-hidden="true"></span>
+        <span>{m ? 'आम्ही सोलापूर, महाराष्ट्र येथे आहोत.' : 'We are based in Solapur, Maharashtra.'}</span>
+        <span class="clock" data-clock>--:--:--</span>
+        <small>{m ? 'भारतीय प्रमाणवेळ (GMT+5:30)' : 'India Standard Time (GMT+5:30)'}</small>
+      </p>
+      <button class="burger is-x" type="button" data-menu-close aria-label={d.closeMenu} autofocus><span></span><span></span></button>
+    </div>
+    <div class="container--wide menu__body">
+      <nav class="menu__main" aria-label={d.menu}>
+        <ol>
+          {
+            main.map((x, i) => (
+              <li style={`--i:${i}`}>
+                <a class="menu__link" href={href(lang, x.to)} aria-current={isActive(x.to) ? 'page' : undefined}>
+                  <span class="menu__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+                  <span>{x.label}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ol>
+      </nav>
+      <div class="menu__side">
+        <div class="menu__group" style="--i:3">
+          <h2>{d.range}</h2>
+          <ul class="menu__cats">{CATEGORIES.map((c) => <li><a href={href(lang, categoryUrl(c.id))}>{c.short[lang]}</a></li>)}</ul>
+        </div>
+        <div class="menu__group" style="--i:5">
+          <h2>{d.crops}</h2>
+          <ul class="chips">{CROPS.map((c) => <li><a class="chip" href={href(lang, cropUrl(c.id))}>{c.name[lang]}</a></li>)}</ul>
+        </div>
+        <div class="menu__group" style="--i:7">
+          <h2>{m ? 'कंपनी' : 'Company'}</h2>
+          <ul class="menu__company">{company.map((x) => <li><a href={href(lang, x.to)}>{x.label}</a></li>)}</ul>
+        </div>
+      </div>
+    </div>
+    <div class="container--wide menu__foot">
+      <div class="menu__social" style="--i:8">
+        {
+          social.map((s) => (
+            <a href={s.url} target={s.url.startsWith('http') ? '_blank' : undefined} rel={s.url.startsWith('http') ? 'noopener' : undefined}>
+              {s.name}
+            </a>
+          ))
+        }
+      </div>
+      <div class="menu__reach" style="--i:9">
+        <a href={`tel:${CONTACT.phonePrimary.tel}`}>{CONTACT.phonePrimary.label}</a>
+        <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+        <a class="sysdeva" href={altHref} hreflang={altLang} lang={altLang}>{altLabel}</a>
+      </div>
+    </div>
+  </div>
+</dialog>

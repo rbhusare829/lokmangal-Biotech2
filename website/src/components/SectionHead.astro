@@ -1,0 +1,24 @@
+---
+import { maskWords } from '../data/split';
+import Kicker from './Kicker.astro';
+
+interface Props {
+  eyebrow?: string;
+  /** Small label next to the eyebrow. When set, the eyebrow becomes a full-width kicker row. */
+  tag?: string;
+  title: string;
+  lead?: string;
+  center?: boolean;
+  level?: 'h1' | 'h2';
+}
+
+const { eyebrow, tag, title, lead, center = false, level = 'h2' } = Astro.props;
+const Tag = level;
+---
+
+{tag && eyebrow && <Kicker title={eyebrow} label={tag} center={center} class="section-kicker" />}
+<div class:list={['section-head', center && 'center']}>
+  {eyebrow && !tag && <span class="eyebrow" data-reveal="fade">{eyebrow}</span>}
+  <Tag class:list={[level]} data-words set:html={maskWords(title)} />
+  {lead && <p class="lead" data-reveal style="--d:.2s">{lead}</p>}
+</div>

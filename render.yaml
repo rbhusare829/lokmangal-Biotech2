@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: lokmangal-biotech2
+    runtime: static
+    rootDir: website
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    pullRequestPreviewsEnabled: false
+    envVars:
+      # Astro refuses to build on Node older than 22.23.4.
+      - key: NODE_VERSION
+        value: 24.13.1
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN

@@ -1,0 +1,539 @@
+---
+import '../../styles/home.css';
+import Base from '../../layouts/Base.astro';
+import Hero from '../../components/Hero.astro';
+import Icon from '../../components/Icon.astro';
+import Photo from '../../components/Photo.astro';
+import PackImage from '../../components/PackImage.astro';
+import CropCard from '../../components/CropCard.astro';
+import Rail from '../../components/Rail.astro';
+import NutrientTable from '../../components/NutrientTable.astro';
+import DoseCalculator from '../../components/DoseCalculator.astro';
+import SectionHead from '../../components/SectionHead.astro';
+import Kicker from '../../components/Kicker.astro';
+import Scrub from '../../components/Scrub.astro';
+import Cta from '../../components/Cta.astro';
+import { href, num, type Lang } from '../../data/types';
+import { t } from '../../data/i18n';
+import { langPaths } from '../../data/routes';
+import { maskWords, slideWords, wordCount } from '../../data/split';
+import { CONTACT, ESTABLISHED, FAQS, FOUNDER, GROUP_UNITS, JOURNEY, STATS, YEARS_OF_SERVICE } from '../../data/site';
+import { CATEGORIES, TOTAL_PRODUCTS, bySlug, categoryOf, categoryUrl, productUrl, productTitle } from '../../data/products';
+import { CROPS } from '../../data/crops';
+
+export const getStaticPaths = () => langPaths();
+
+const { lang } = Astro.props as { lang: Lang };
+const d = t(lang);
+const m = lang === 'mr';
+const fmt = (n: number) => new Intl.NumberFormat(m ? 'mr-IN' : 'en-IN').format(n);
+const short = (id: Parameters<typeof categoryOf>[0]) => categoryOf(id).short[lang];
+
+/* 2 · Statement scene */
+const lines = m ? ['मातीला पोषण', 'देणारे विज्ञान,', 'उद्याच्या', 'भरघोस पिकासाठी.'] : ['Science that', 'feeds the soil', '& grows', 'tomorrow.'];
+let wordIndex = 0;
+const sceneLines = lines.map((line, i) => {
+  const html = slideWords(line, wordIndex, i % 2 ? 1 : -1);
+  wordIndex += wordCount(line);
+  return html;
+});
+const flyers = [
+  { img: 'crop-grapes', s: 'left:3%;top:6%;width:clamp(120px,15vw,250px);aspect-ratio:4/5', speed: 1.25 },
+  { img: 'lab-man', s: 'right:4%;top:2%;width:clamp(110px,13vw,220px);aspect-ratio:3/4', speed: 0.85 },
+  { img: 'crop-tomato', s: 'right:9%;top:52%;width:clamp(120px,14vw,240px);aspect-ratio:1', speed: 1.45 },
+  { img: 'drip-banana', s: 'left:9%;top:58%;width:clamp(100px,11vw,190px);aspect-ratio:3/4', speed: 1.05 },
+  { img: 'crop-chilli', s: 'left:30%;top:92%;width:clamp(120px,15vw,250px);aspect-ratio:4/3', speed: 1.6 },
+  { img: 'hero-soil', s: 'right:28%;top:-14%;width:clamp(110px,12vw,200px);aspect-ratio:4/5', speed: 0.7 },
+];
+
+/* 3 · Stacked highlights */
+const highlights = [
+  {
+    img: 'hero-broadcast',
+    title: m ? 'पीक पोषण' : 'Crop nutrition',
+    label: m ? '१२ उत्पादन गट' : '12 product families',
+    sub: m ? 'एन.पी.के. मिश्र खते, मॅग्नेट दुय्यम अन्नद्रव्ये आणि सूक्ष्म अन्नद्रव्ये, पिकाच्या प्रत्येक टप्प्यासाठी.' : 'NPK mixtures, Magnet secondary nutrients and micronutrients for every stage of the crop.',
+    to: '/products/',
+    focus: '50% 45%',
+  },
+  {
+    img: 'drip-line',
+    title: m ? 'विद्राव्य खते व ठिबक' : 'Water soluble & drip',
+    label: m ? 'फास्टर+ ग्रेड' : 'FASTER+ grades',
+    sub: m ? 'फवारणी व ठिबक सिंचनासाठी १००% पाण्यात विरघळणारे ग्रेड.' : '100% water soluble grades for foliar spray and drip fertigation.',
+    to: categoryUrl('water-soluble'),
+    focus: '50% 60%',
+  },
+  {
+    img: 'hero-lab',
+    title: m ? 'माती व पाणी परीक्षण' : 'Soil & water testing',
+    label: m ? 'वापरकर्त्यांसाठी मोफत' : 'Free for users',
+    sub: m ? 'लोकमंगल समूहाच्या महाराष्ट्र संशोधन व विकास केंद्रात.' : 'At the Maharashtra Research and Development Centre of the Lokmangal Group.',
+    to: '/research-lab/',
+    focus: '50% 40%',
+  },
+];
+
+/* 4 · Achievements */
+const snapshot = [
+  { count: ESTABLISHED, plain: true, text: num(lang, ESTABLISHED), label: m ? 'स्थापना' : 'Established' },
+  { count: STATS.capacityTotal, suffix: m ? ' मे.ट.' : ' MT', text: `${fmt(STATS.capacityTotal)}${m ? ' मे.ट.' : ' MT'}`, label: m ? 'वार्षिक उत्पादन क्षमता' : 'Capacity per year' },
+  { count: STATS.dealers, suffix: '+', text: `${fmt(STATS.dealers)}+`, label: m ? 'डीलर्सचे जाळे' : 'Dealers in our network' },
+  { count: TOTAL_PRODUCTS, text: num(lang, TOTAL_PRODUCTS), label: m ? 'उत्पादने' : 'Products' },
+  { count: STATS.dealerStates, text: num(lang, STATS.dealerStates), label: m ? 'राज्यांत पोहोच' : 'States reached' },
+];
+
+/* 5 · What we do */
+const services = [
+  {
+    title: m ? 'पीक पोषण' : 'Crop nutrition',
+    desc: m ? 'एन.पी.के. मिश्र खते, मॅग्नेट, फास्टर+ विद्राव्य ग्रेड आणि सूक्ष्म अन्नद्रव्ये, जी जमिनीची उत्पादकता टिकवतात.' : 'NPK mixtures, Magnet, FASTER+ water soluble grades and micronutrients that keep soil productive.',
+    tags: [short('npk'), short('secondary'), short('water-soluble'), short('micronutrients'), short('straight')],
+    img: 'lineup-bags',
+    to: '/products/',
+  },
+  {
+    title: m ? 'सेंद्रिय व जैविक' : 'Organic & bio',
+    desc: m ? 'सेंद्रिय खते, जैविक कल्चर, वाढ प्रवर्तके आणि जैविक कीटकनाशके, निरोगी जमीन व सुरक्षित पिकांसाठी.' : 'Organic manures, bio-fertilizer cultures, growth promoters and bio-pesticides for healthier soil and safer crops.',
+    tags: [short('organic'), short('bio-fertilizers'), short('growth-promoters'), short('bio-stimulants'), short('bio-fungicides'), short('bio-pesticides')],
+    img: 'hero-soil',
+    to: categoryUrl('organic'),
+  },
+  {
+    title: m ? 'माती व पाणी प्रयोगशाळा' : 'Soil & water lab',
+    desc: m ? 'माती, पाणी, कच्चा माल व तयार उत्पादनांचे परीक्षण, म्हणजे प्रत्येक शिफारस तथ्यांवर आधारित.' : 'Testing of soil, water, raw material and finished products, so every recommendation starts from facts.',
+    tags: m ? ['माती परीक्षण', 'पाणी परीक्षण', 'कच्च्या मालाचे विश्लेषण', 'तयार उत्पादनांचे विश्लेषण'] : ['Soil testing', 'Water testing', 'Raw material analysis', 'Finished product analysis'],
+    img: 'lab-man',
+    to: '/research-lab/',
+  },
+  {
+    title: m ? 'पिकानुसार मार्गदर्शन' : 'Crop guidance',
+    desc: m ? `ऊस, केळी, द्राक्ष, कांद्यासह ${num(lang, CROPS.length)} पिकांसाठी नमूद उत्पादने व मात्रा.` : `The products and doses named for ${CROPS.length} crops, from sugarcane and banana to grapes and onion.`,
+    tags: CROPS.slice(0, 6).map((c) => c.name[lang]),
+    img: 'crop-grapes',
+    to: '/crops/',
+  },
+];
+
+/* 6 · Bento */
+const nutrients = ['N', 'P', 'K', 'Ca', 'Mg', 'S', 'Zn', 'Fe', 'B', 'Mn', 'Cu', 'Mo'];
+const process = m
+  ? ['जमीन ओळखा', 'पिकानुसार निवडा', 'योग्य मात्रा द्या', 'भरघोस उत्पादन घ्या']
+  : ['Know your soil', 'Choose by crop', 'Apply the right dose', 'Harvest more'];
+
+/* 7 · Flagship */
+const magnet = bySlug('magnet');
+const bars = magnet.contents.map((c) => ({ k: c.k[lang], v: Number(c.v as string) }));
+const flagship = ['krishi-vardan-18-18-10', 'faster-plus', 'lancer', 'champion', 'zicom'].map(bySlug);
+
+/* 12 · Story */
+const ring = Math.min(1, YEARS_OF_SERVICE / 25);
+---
+
+<Base
+  lang={lang}
+  path="/"
+  title={m ? 'लोकमंगल बायोटेक प्रा. लि. | संतुलित पोषण, भरघोस उत्पादन' : 'Lokmangal Bio-Tech Pvt. Ltd. | Balanced nutrition, richer harvests'}
+  description={m
+    ? 'लोकमंगल बायोटेक, सोलापूर: एन.पी.के. मिश्र खते, मॅग्नेट, फास्टर+ विद्राव्य खते, सूक्ष्म अन्नद्रव्ये, सेंद्रिय व जैविक उत्पादने. २००६ पासून १०००+ डीलर्सचे जाळे.'
+    : 'Lokmangal Bio-Tech, Solapur: NPK mixtures, Magnet, FASTER+ water soluble fertilizers, micronutrients, organic and bio-products. Since 2006, with 1000+ dealers.'}
+>
+  <Hero lang={lang} />
+
+  <!-- 2 · Statement with flying images -->
+  <section class="scene" data-scroll="scene">
+    <div class="scene__sticky">
+      <figure class="scene__center" aria-hidden="true">
+        <Photo name="woman-harvest" alt="" widths={[800, 1280, 1920]} sizes="100vw" quality={60} />
+      </figure>
+      {
+        flyers.map((f) => (
+          <figure class="scene__fly" style={`${f.s};--sp:${f.speed}`} aria-hidden="true">
+            <Photo name={f.img} alt="" widths={[320, 520]} sizes="240px" quality={62} />
+          </figure>
+        ))
+      }
+      <p class="scene__text" data-slide>
+        {sceneLines.map((html) => <span class="scene__line" set:html={html} />)}
+      </p>
+    </div>
+  </section>
+
+  <!-- 3 · Stacked highlights -->
+  <section class="scards" aria-label={m ? 'ठळक वैशिष्ट्ये' : 'Highlights'}>
+    {
+      highlights.map((h, i) => (
+        <article class="scard" style={`--i:${i}`}>
+          <a class="scard__link" href={href(lang, h.to)}>
+            <Photo name={h.img} alt="" class="scard__img" widths={[800, 1280, 1920]} sizes="100vw" quality={64} style={`object-position:${h.focus}`} />
+            <div class="container--wide scard__bar">
+              <h2 class="scard__title">{h.title}</h2>
+              <span class="scard__line" aria-hidden="true" />
+              <span class="scard__label">{h.label}</span>
+            </div>
+            <div class="container--wide scard__foot">
+              <p class="scard__sub">{h.sub}</p>
+              <span class="scard__go" aria-hidden="true"><Icon name="arrow-ur" size={22} /></span>
+            </div>
+          </a>
+        </article>
+      ))
+    }
+  </section>
+
+  <!-- 4 · Achievements -->
+  <section class="section section--dark achv">
+    <div class="container--wide">
+      <Kicker title={m ? 'आमची कामगिरी' : 'Our achievements'} label={m ? 'आकडे व टप्पे' : 'metrics & milestones'} />
+      <Scrub as="h2" class="achv__title" text={m ? 'प्रत्येक भरघोस पिकामागे संतुलित जमिनीची एक कहाणी असते' : 'Behind every harvest grows a story of balanced soil'} />
+      <p class="achv__sub" data-reveal>{m ? 'शेत बदलत, एका सुपीक शेतातून दुसऱ्या शेताकडे' : 'Transforming farms, field by fertile field'}</p>
+
+      <div class="achv__row">
+        <a class="reel" href={href(lang, '/gallery/')} data-reveal="img">
+          <Photo name="team" alt={m ? 'लोकमंगल बायोटेकची टीम' : 'The Lokmangal Bio-Tech team'} widths={[640, 1000]} sizes="(width < 900px) 92vw, 46vw" />
+          <span class="reel__pill">{m ? 'गॅलरी पाहा' : 'see gallery'}</span>
+        </a>
+        <div class="sheet" data-reveal style="--d:.1s">
+          <p class="sheet__tag"><span class="ring" aria-hidden="true"></span>{m ? `${num(lang, JOURNEY[0].year)} पासून · मोफत माती व पाणी परीक्षण` : `Since ${JOURNEY[0].year} · Free soil and water testing`}</p>
+          <h3 class="sheet__title">{JOURNEY[0].title[lang]}</h3>
+          <p class="sheet__text">{JOURNEY[0].text[lang]}</p>
+          <a class="tlink" href={href(lang, '/research-lab/')}>{m ? 'प्रयोगशाळा पाहा' : 'view the lab'}</a>
+        </div>
+        <dl class="sheet__stats" data-reveal style="--d:.2s">
+          <div>
+            <dt>{m ? 'वार्षिक क्षमता' : 'Capacity per year'}</dt>
+            <dd>{fmt(STATS.capacityTotal)}<small>{m ? ' मे.ट.' : ' MT'}</small></dd>
+          </div>
+          <div>
+            <dt>{m ? 'उत्पादनात वाढ' : 'More production'}</dt>
+            <dd><small>{m ? 'सुमारे ' : '~'}</small>{num(lang, STATS.yieldGain)}%</dd>
+          </div>
+        </dl>
+      </div>
+
+      <p class="snap__head" data-reveal>{m ? 'एका दृष्टिक्षेपात' : 'At a glance'}</p>
+      <dl class="snap" data-stagger>
+        {
+          snapshot.map((s) => (
+            <div class="snap__item">
+              <dt>{s.label}</dt>
+              <dd class="snap__num" data-count={s.count} data-suffix={s.suffix ?? ''} data-plain={s.plain ? 'true' : undefined}>
+                {s.text}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+    <div class="ticker" aria-label={m ? 'लोकमंगल समूहातील संस्था' : 'Lokmangal Group activities'}>
+      <div class="ticker__track">
+        {[0, 1].map((copy) => GROUP_UNITS.map((u) => <span class="ticker__item" aria-hidden={copy ? 'true' : undefined}><Icon name="leaf" size={16} />{u[lang]}</span>))}
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · What we do -->
+  <section class="section svc-sec">
+    <div class="container--wide">
+      <h2 class="svc__giant" data-words set:html={maskWords(m ? 'आम्ही काय करतो' : 'what we do')} />
+      <p class="svc__lead" data-reveal>{m ? 'प्रयोगशाळेपासून तुमच्या शेतापर्यंत, प्रत्येक पिकासाठी संशोधनावर आधारित पोषण व संरक्षण.' : 'Research-based nutrition and protection for every crop, from the laboratory to your land.'}</p>
+      <div class="svc" data-follow>
+        <div class="svc__preview" data-follow-box aria-hidden="true">
+          <div class="svc__strip">
+            {services.map((s) => <Photo name={s.img} alt="" widths={[420]} sizes="300px" quality={60} />)}
+          </div>
+        </div>
+        {
+          services.map((s, i) => (
+            <a class="svc__row" href={href(lang, s.to)} data-follow-item data-reveal>
+              <div class="svc__name">
+                <span class="svc__num">{`{${String(i + 1).padStart(2, '0')}}`}</span>
+                <h3>{s.title} <span aria-hidden="true">—</span></h3>
+              </div>
+              <p class="svc__desc">{s.desc}</p>
+              <ul class="svc__tags">{s.tags.map((tag) => <li>{tag}</li>)}</ul>
+            </a>
+          ))
+        }
+      </div>
+      <div class="tlinks svc__links" data-reveal>
+        <span class="tlinks__label">{m ? 'अधिक उत्पादन हवे आहे?' : 'Ready to grow more?'}</span>
+        <a class="tlink" href={href(lang, '/products/')}>{m ? 'उत्पादने पाहा' : 'explore products'}</a>
+        <a class="tlink" href={href(lang, '/contact/')}>{m ? 'आमच्याशी बोला' : 'talk to us'}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Benefits -->
+  <section class="section section--cream bento-sec">
+    <div class="container--wide">
+      <SectionHead
+        eyebrow={m ? 'शेतकरी आम्हाला का निवडतात' : 'Why farmers choose us'}
+        tag={m ? 'फायदे' : 'benefits'}
+        title={m ? 'फक्त उत्पादने नव्हे, <em>साथ</em>' : 'Partnership, <em>not just products</em>'}
+        lead={m ? 'संशोधन, परीक्षण, उत्पादन आणि डीलर्सचे जाळे, सर्व काही एकाच शेतकरी-केंद्रित समूहाकडून.' : 'Research, testing, manufacturing and a dealer network, all from one farmer-first group.'}
+      />
+      <div class="bento">
+        <a class="bento__cell b-research" href={href(lang, '/research-lab/')} data-reveal>
+          <Photo name="hero-lab" alt="" class="bento__bg" widths={[480, 800]} sizes="(width < 760px) 92vw, 25vw" />
+          <div class="bento__body">
+            <p class="bento__k"><span class="ring" aria-hidden="true"></span>{m ? 'संशोधनावर आधारित' : 'Research-based'}</p>
+            <h3>{m ? 'आमच्या संशोधनातून तयार उत्पादने' : 'Products from our own research'}</h3>
+            <p>{m ? 'तज्ज्ञ व शास्त्रज्ञांच्या संशोधनातून विकसित.' : 'Developed by our experts and scientists.'}</p>
+          </div>
+        </a>
+
+        <div class="bento__cell b-balance" data-reveal style="--d:.06s">
+          <h3>{m ? 'संतुलित पोषण' : 'Balanced nutrition'}</h3>
+          <ul class="b-balance__els" aria-label={m ? 'अन्नद्रव्ये' : 'Nutrients'}>
+            {nutrients.map((n, i) => <li style={`--i:${i}`} class:list={[i < 3 && 'is-major', i >= 3 && i < 6 && 'is-secondary']}>{n}</li>)}
+          </ul>
+          <p>{m ? 'मुख्य, दुय्यम आणि सूक्ष्म अन्नद्रव्ये एकाच श्रेणीत.' : 'Major, secondary and micronutrients in one range.'}</p>
+        </div>
+
+        <a class="bento__cell b-lab" href={href(lang, '/research-lab/#sample')} data-reveal style="--d:.12s">
+          <p class="bento__k"><span class="ring ring--dark" aria-hidden="true"></span>{m ? 'वापरकर्त्यांसाठी मोफत' : 'Free for users'}</p>
+          <h3>{m ? 'माती व पाणी परीक्षण' : 'Soil & water testing'}</h3>
+          <p>{m ? 'खत देण्यापूर्वी जमीन ओळखा.' : 'Know your soil before you feed it.'}</p>
+          <ol class="b-lab__steps">
+            <li><span>01</span>{m ? 'नमुना घ्या' : 'Take a sample'}</li>
+            <li><span>02</span>{m ? 'प्रयोगशाळेत द्या' : 'Bring it to the lab'}</li>
+            <li><span>03</span>{m ? 'योग्य मात्रा ठरवा' : 'Plan the right dose'}</li>
+          </ol>
+          <span class="b-lab__go" aria-hidden="true"><Icon name="arrow-ur" size={22} /></span>
+        </a>
+
+        <div class="bento__cell b-stat b-dealers" data-reveal style="--d:.08s">
+          <Icon name="store" size={26} class="b-stat__icon" />
+          <p class="bento__num" data-count={STATS.dealers} data-suffix="+">{fmt(STATS.dealers)}+</p>
+          <p class="b-stat__label">{m ? 'डीलर्स' : 'Dealers'}</p>
+          <p class="b-stat__sub">{m ? `${num(lang, STATS.dealerStates)} राज्यांत` : `Across ${STATS.dealerStates} states`}</p>
+        </div>
+
+        <div class="bento__cell b-stat b-yield" data-reveal style="--d:.14s">
+          <Icon name="sprout" size={26} class="b-stat__icon" />
+          <p class="bento__num"><small>{m ? 'सुमारे ' : '~'}</small><span data-count={STATS.yieldGain} data-suffix="%">{num(lang, STATS.yieldGain)}%</span></p>
+          <p class="b-stat__label">{m ? 'उत्पादनात वाढ' : 'More production'}</p>
+          <p class="b-stat__sub">{m ? 'संतुलित पोषणातून शेतकऱ्यांचा अनुभव' : 'Seen by farmers with balanced nutrition'}</p>
+        </div>
+
+        <a class="bento__cell b-units" href={href(lang, '/manufacturing/')} data-reveal style="--d:.2s">
+          <Photo name="factory-front" alt="" class="bento__bg" widths={[480, 800]} sizes="(width < 760px) 92vw, 25vw" />
+          <div class="bento__body">
+            <p class="bento__k"><span class="ring" aria-hidden="true"></span>{d.manufacturing}</p>
+            <h3>{m ? 'दोन उत्पादन केंद्रे' : 'Two production units'}</h3>
+            <p>{m ? `सोलापूर व वडोदरा, प्रत्येकी ${fmt(STATS.capacityPerPlant)} मे. टन प्रति वर्ष.` : `Solapur and Vadodara, ${fmt(STATS.capacityPerPlant)} MT per year each.`}</p>
+          </div>
+        </a>
+
+        <div class="bento__cell b-process" data-reveal style="--d:.1s">
+          <p class="bento__k"><span class="ring" aria-hidden="true"></span>{m ? 'संतुलित पोषणाचा मार्ग' : 'The balanced way'}</p>
+          <ol class="b-process__steps">
+            {
+              process.map((p, i) => (
+                <li style={`--i:${i}`}>
+                  <span class="b-process__n">{String(i + 1).padStart(2, '0')}</span>
+                  <span class="b-process__t">{p}</span>
+                  <span class="b-process__bar" aria-hidden="true" />
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+
+        <div class="bento__cell b-years" data-reveal style="--d:.16s">
+          <svg class="b-years__ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle cx="60" cy="60" r="52" pathLength="100" />
+            <circle class="b-years__arc" cx="60" cy="60" r="52" pathLength="100" style={`--arc:${(ring * 100).toFixed(1)}`} />
+          </svg>
+          <p class="b-years__num"><span data-count={YEARS_OF_SERVICE}>{num(lang, YEARS_OF_SERVICE)}</span></p>
+          <p class="b-stat__label">{m ? 'वर्षांची शेतकरी सेवा' : 'Years serving farmers'}</p>
+          <p class="b-stat__sub">{m ? `${num(lang, ESTABLISHED)} पासून` : `Since ${ESTABLISHED}`}</p>
+        </div>
+      </div>
+      <div class="tlinks bento__links" data-reveal>
+        <span class="tlinks__label">{m ? 'मुळांशी घट्ट, कामाशी निष्ठा' : 'Rooted & dedicated'}</span>
+        <a class="tlink" href={href(lang, '/about/')}>{m ? 'आमची वाटचाल' : 'our story'}</a>
+        <a class="tlink" href={href(lang, '/about/founder-message/')}>{d.founder}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · Flagship products -->
+  <section class="section flag-sec">
+    <div class="container--wide">
+      <SectionHead
+        center
+        eyebrow={m ? 'प्रमुख उत्पादने' : 'Flagship products'}
+        tag={m ? 'पहिली पसंती' : 'first choice'}
+        title={m ? 'शेतकऱ्यांची <em>पहिली पसंती</em>' : 'The <em>first choice</em> of farmers'}
+        lead={m ? 'ऊस, केळी, सोयाबीन, कांदा, कापूस व भाजीपाला पिकांसाठी लोकमंगलची प्रमुख उत्पादने.' : 'Our leading products for sugarcane, banana, soybean, onion, cotton and vegetable crops.'}
+      />
+      <div class="flag">
+        <a class="flag__pack" href={href(lang, productUrl(magnet))} data-reveal="img">
+          <PackImage name="magnet" alt={magnet.name[lang]} widths={[320, 480]} sizes="(width < 900px) 60vw, 300px" />
+          <span class="flag__note"><span class="ring" aria-hidden="true"></span>{categoryOf('secondary').short[lang]}</span>
+        </a>
+        <div class="flag__mid" data-reveal style="--d:.1s">
+          <p class="flag__lockup">{magnet.name[lang]}</p>
+          <p class="flag__grade grade">{magnet.grade}</p>
+          <p class="flag__text">{m ? 'कॅल्शियम, मॅग्नेशियम व गंधकाचे मिश्रण. एन.पी.के.सोबत वापरल्याने जमिनीची सुपीकता व उत्पादकता टिकते.' : 'A mix of calcium, magnesium and sulphur. Used with NPK, it maintains the fertility and productivity of soil.'}</p>
+          <div class="spot-bars flag__bars">
+            {
+              bars.map((b) => (
+                <div class="spot-bar">
+                  <span>{b.k}</span>
+                  <span class="spot-bar__track"><span class="spot-bar__fill" style={`--v:${b.v * 8}%`} /></span>
+                  <span class="grade">{String(b.v).padStart(2, '0')}</span>
+                </div>
+              ))
+            }
+          </div>
+          <p class="flag__dose"><span>{d.dose}</span>{magnet.dose[lang]}</p>
+          <div class="tlinks">
+            <a class="tlink" href={href(lang, productUrl(magnet))}>{d.viewDetails}</a>
+            <a class="tlink" href={href(lang, '/knowledge/#calculator')}>{d.calcThis}</a>
+          </div>
+        </div>
+        <ul class="flag__list" data-stagger>
+          {
+            flagship.map((p) => (
+              <li>
+                <a href={href(lang, productUrl(p))}>
+                  <PackImage name={p.img!} alt="" class="flag__thumb" widths={[120, 180]} sizes="64px" />
+                  <span>
+                    <strong>{productTitle(p, lang)}</strong>
+                    <small>{p.subtitle[lang]}</small>
+                  </span>
+                  <Icon name="arrow-ur" size={18} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="tlinks flag__links" data-reveal>
+        <span class="tlinks__label">{m ? `${num(lang, CATEGORIES.length)} उत्पादन गट` : `${CATEGORIES.length} product families`}</span>
+        {CATEGORIES.slice(0, 4).map((c) => <a class="tlink" href={href(lang, categoryUrl(c.id))}>{c.short[lang]}</a>)}
+        <a class="tlink" href={href(lang, '/products/')}>{d.allProducts}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · Crops -->
+  <section class="section section--cream crops-sec" style="padding-bottom:clamp(56px,6vw,90px)">
+    <div class="container--wide">
+      <Kicker title={m ? 'पिकानुसार' : 'By crop'} label={m ? `${num(lang, CROPS.length)} पिके` : `${CROPS.length} crops`} />
+      <div class="section-head section-head--row crops-head">
+        <div class="section-head__text">
+          <h2 class="h2" data-words set:html={maskWords(m ? 'तुमच्या पिकासाठी <em>योग्य उत्पादन</em>' : 'The right products for <em>your crop</em>')} />
+          <p class="lead" data-reveal>{m ? 'ऊस, केळी, द्राक्ष, डाळिंब, कांदा आणि इतर पिकांसाठी नमूद उत्पादने व मात्रा.' : 'The products and doses named for sugarcane, banana, grapes, pomegranate, onion and other crops.'}</p>
+        </div>
+        <div class="rail-controls">
+          <button class="iconbtn" type="button" data-rail-prev aria-label={d.prev}><Icon name="prev" size={18} /></button>
+          <button class="iconbtn" type="button" data-rail-next aria-label={d.next}><Icon name="next" size={18} /></button>
+        </div>
+      </div>
+    </div>
+    <Rail>{CROPS.map((c) => <CropCard crop={c} lang={lang} />)}</Rail>
+  </section>
+
+  <!-- 9 · Nutrient table -->
+  <section class="section section--dark ptable-sec">
+    <div class="container">
+      <SectionHead
+        eyebrow={m ? 'अन्नद्रव्य तक्ता' : 'The nutrient table'}
+        tag={m ? 'संवादात्मक' : 'interactive'}
+        title={m ? 'पिकाला काय लागते, <em>ते पाहा</em>' : 'See what your crop <em>needs</em>'}
+        lead={m ? 'कोणत्याही अन्नद्रव्यावर क्लिक करा. त्याचे कार्य आणि ते देणारी लोकमंगल उत्पादने येथे दिसतील.' : 'Tap any nutrient to see what it does, and which Lokmangal products supply it.'}
+      />
+      <NutrientTable lang={lang} />
+    </div>
+  </section>
+
+  <!-- 10 · Dose calculator -->
+  <section class="section">
+    <div class="container">
+      <SectionHead
+        center
+        eyebrow={m ? 'मात्रा मोजा' : 'Dose calculator'}
+        tag={m ? 'साधन' : 'tool'}
+        title={m ? 'तुम्हाला <em>किती लागेल</em> ते काढा' : 'Work out <em>how much you need</em>'}
+        lead={m ? 'उत्पादन निवडा, क्षेत्र किंवा टाकीतील पाणी ठरवा. आमच्या उत्पादन माहितीतील मात्रेनुसार प्रमाण लगेच दिसेल.' : 'Choose a product, then set your area or tank size. The quantity follows the dose in our product data.'}
+      />
+      <div data-reveal="zoom"><DoseCalculator lang={lang} /></div>
+    </div>
+  </section>
+
+  <!-- 11 · FAQ -->
+  <section class="section section--cream faqx-sec">
+    <div class="container--wide">
+      <SectionHead
+        center
+        eyebrow={m ? 'नेहमीचे प्रश्न' : 'Popular queries'}
+        tag={m ? 'प्रश्नोत्तरे' : 'faq'}
+        title={m ? 'तुमच्या प्रश्नांची <em>स्पष्ट उत्तरे</em>' : 'Quick and clear answers to <em>your key questions</em>'}
+        lead={m ? 'आमची उत्पादने, परीक्षण आणि डीलरशिपबद्दल आवश्यक माहिती.' : 'Get the clarity you need about our products, testing and dealership.'}
+      />
+      <div class="faqx">
+        <div class="accordion" data-reveal>
+          {
+            FAQS.map((f) => (
+              <details class="acc">
+                <summary>
+                  {f.q[lang]}
+                  <span class="acc__icon" aria-hidden="true" />
+                </summary>
+                <div class="acc__body">{f.a[lang]}</div>
+              </details>
+            ))
+          }
+        </div>
+        <aside class="faqx__card" data-reveal="right">
+          <div class="faqx__img"><Photo name="man-sowing" alt="" widths={[420, 640]} sizes="(width < 900px) 92vw, 360px" /></div>
+          <h3>{m ? 'अजून प्रश्न आहेत? आमच्याशी बोला.' : 'Still looking for answers, or need a good chat?'}</h3>
+          <p>{m ? 'उत्पादन, मात्रा आणि डीलरशिपबद्दल आमची टीम मार्गदर्शन करेल.' : 'Our team will guide you on products, doses and dealership.'}</p>
+        </aside>
+      </div>
+      <div class="tlinks faqx__links" data-reveal>
+        <span class="tlinks__label">{m ? 'काही राहिले का?' : 'Anything left out?'}</span>
+        <a class="tlink" href={`tel:${CONTACT.phonePrimary.tel}`}>{d.callUs}</a>
+        <a class="tlink" href={href(lang, '/contact/')}>{m ? 'संपर्क करा' : 'contact us'}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 · Story -->
+  <section class="section story-sec">
+    <div class="container--wide">
+      <Kicker title={m ? 'आमची वाटचाल' : 'Our story'} label={m ? 'संस्थापक' : 'founder'} />
+      <div class="story">
+        <figure class="story__photo" data-reveal="img">
+          <Photo name="founder" alt={FOUNDER.name[lang]} widths={[420, 700]} sizes="(width < 900px) 80vw, 360px" />
+        </figure>
+        <div class="story__body">
+          <span class="story__mark" aria-hidden="true">“</span>
+          <blockquote class="story__quote" data-words set:html={maskWords(FOUNDER.pull[lang])} />
+          <p class="story__who" data-reveal style="--d:.3s"><strong>{FOUNDER.name[lang]}</strong><span>{FOUNDER.role[lang]}</span></p>
+          <div class="tlinks tlinks--start" data-reveal style="--d:.4s">
+            <a class="tlink" href={href(lang, '/about/founder-message/')}>{m ? 'संपूर्ण संदेश वाचा' : 'read the message'}</a>
+            <a class="tlink" href={href(lang, '/about/')}>{d.company}</a>
+          </div>
+        </div>
+      </div>
+      <ol class="journey" data-stagger>
+        {
+          JOURNEY.map((j) => (
+            <li class="journey__item">
+              <span class="journey__year">{num(lang, j.year)}</span>
+              <h3>{j.title[lang]}</h3>
+              <p>{j.text[lang]}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <Cta lang={lang} />
+</Base>

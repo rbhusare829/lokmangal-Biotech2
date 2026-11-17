@@ -1,0 +1,51 @@
+---
+import { href, type Lang } from '../data/types';
+import { t } from '../data/i18n';
+import { maskWords } from '../data/split';
+import Photo from './Photo.astro';
+
+interface Crumb {
+  label: string;
+  to?: string;
+}
+
+interface Props {
+  lang: Lang;
+  title: string;
+  eyebrow?: string;
+  lead?: string;
+  image?: string;
+  imageAlt?: string;
+  focus?: string;
+  crumbs?: Crumb[];
+}
+
+const { lang, title, eyebrow, lead, image, imageAlt = '', focus, crumbs = [] } = Astro.props;
+const d = t(lang);
+const crosses = [0, 33.333, 66.666, 100].flatMap((x) => [0, 50, 100].map((y) => ({ x, y })));
+---
+
+<section class="page-hero">
+  {
+    image && (
+      <div class="page-hero__bg">
+        <Photo name={image} alt={imageAlt} class="page-hero__img" widths={[800, 1280, 1920]} sizes="100vw" eager style={focus ? `object-position:${focus}` : undefined} />
+      </div>
+    )
+  }
+  <div class="ahero__crosses page-hero__crosses" aria-hidden="true">
+    {crosses.map((c, i) => <i style={`--x:${c.x}%;--y:${c.y}%;--i:${i}`} />)}
+  </div>
+  <div class="container--wide page-hero__inner">
+    <nav class="crumbs-nav" aria-label="Breadcrumb">
+      <ol class="crumbs">
+        <li><a href={href(lang, '/')}>{d.home}</a></li>
+        {crumbs.map((c, i) => <li>{c.to && i < crumbs.length - 1 ? <a href={href(lang, c.to)}>{c.label}</a> : <span aria-current="page">{c.label}</span>}</li>)}
+      </ol>
+    </nav>
+    {eyebrow && <span class="eyebrow" data-reveal="fade">{eyebrow}</span>}
+    <h1 class="h1" data-words style="--d:.1s" set:html={maskWords(title)} />
+    {lead && <p class="lead" data-reveal style="--d:.35s">{lead}</p>}
+    <slot />
+  </div>
+</section>

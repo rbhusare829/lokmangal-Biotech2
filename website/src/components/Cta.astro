@@ -1,0 +1,47 @@
+---
+import { href, type Lang } from '../data/types';
+import { t } from '../data/i18n';
+import { CONTACT } from '../data/site';
+import Photo from './Photo.astro';
+
+interface Props {
+  lang: Lang;
+  /** Two lines: plain text, then the accent line in <em>. */
+  title?: string;
+  text?: string;
+  primaryLabel?: string;
+  primaryTo?: string;
+}
+
+const { lang } = Astro.props;
+const d = t(lang);
+const m = lang === 'mr';
+const {
+  title = m ? 'आम्ही जमिनीचे पोषण करतो. <em>पुढचा भरघोस हंगाम तुमचा.</em>' : 'We nourish the soil. <em>Your best harvest is next.</em>',
+  text = m
+    ? 'उत्पादनांची माहिती, डीलरशिप किंवा माती व पाणी परीक्षण, कोणत्याही गोष्टीसाठी आमची टीम मदतीला तयार आहे.'
+    : 'Whether it is a product question, a dealership or a soil and water test, our team is ready to help.',
+  primaryLabel = m ? 'डीलर व्हा' : 'Become a dealer',
+  primaryTo = '/dealers/',
+} = Astro.props;
+
+const [lead = '', accent = '', tail = ''] = title.split(/<\/?em>/);
+---
+
+<section class="cta-x" data-scroll="view">
+  <div class="cta-x__bg" aria-hidden="true">
+    <Photo name="hero-broadcast" alt="" widths={[800, 1280, 1920]} sizes="100vw" quality={55} />
+  </div>
+  <div class="container">
+    <h2 class="cta-x__title" data-reveal="blur">
+      <span><span class="cta-x__first"><span class="ring" aria-hidden="true"></span>{lead.trim()}</span></span>
+      {accent && <span class="cta-x__accent">{accent.trim()}{tail}</span>}
+    </h2>
+    <p class="cta-x__text" data-reveal style="--d:.15s">{text}</p>
+    <div class="tlinks on-dark" data-reveal style="--d:.3s">
+      <a class="tlink" href={href(lang, primaryTo)}>{primaryLabel}</a>
+      <a class="tlink" href={`tel:${CONTACT.phonePrimary.tel}`}>{d.callUs}</a>
+      <a class="tlink" href={`https://wa.me/${CONTACT.phonePrimary.wa}`} target="_blank" rel="noopener">{m ? 'व्हॉट्सॲपवर बोला' : 'Chat on WhatsApp'}</a>
+    </div>
+  </div>
+</section>

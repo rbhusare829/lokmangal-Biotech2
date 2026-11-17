@@ -1,0 +1,16 @@
+---
+/** Section kicker: accent ring + title, a divider, a small label, and a hairline under the row. */
+interface Props {
+  title: string;
+  label?: string;
+  center?: boolean;
+  class?: string;
+}
+
+const { title, label, center = false, class: cls } = Astro.props;
+---
+
+<div class:list={['kicker', center && 'kicker--center', cls]} data-reveal="fade">
+  <span class="kicker__title">{title}</span>
+  {label && <span class="kicker__label">{label}</span>}
+</div>
